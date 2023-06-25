@@ -45,17 +45,19 @@ const (
 	CheckCanBePosedAlreadyHereBadHovered  = "BAD_HOVERED_ENTITY"
 	CheckCanBePosedAlreadyHereAlreadyUsed = "HOVERED_ENTITY_ALREADY_USED"
 	CheckCanBePosedNeedHover              = "NO_ENTITY_TO_PUT"
+	CheckMaxAboveWidth                    = "MAX_WIDTH"
+	CheckMaxAboveHeight                   = "MAX_HEIGHT"
 )
 
 func (m *Map) CheckCanBePosed(uuid string, ent Sprite) error {
 	if ent.WidthCell > 1 {
 		if ent.X+ent.WidthCell >= m.MaxWidth {
-			log.Println("error above max witdh", m.MaxWidth, ent.X)
+			log.Println("error above max width", m.MaxWidth, ent.X)
 			return errors.New("above maximum width")
 		}
 	} else {
 		if ent.X >= m.MaxWidth {
-			log.Println("error above max witdh", m.MaxWidth, ent.X)
+			log.Println("error above max width", m.MaxWidth, ent.X)
 			return errors.New("above maximum width")
 		}
 	}
@@ -143,8 +145,6 @@ func (m *Map) DrawImage(entity Sprite, ctx *gg.Context) {
 	x := entity.X
 	y := entity.Y
 
-	log.Println(x, y)
-
 	xpos, ypos := m.GridToPixel(x, y)
 
 	ctx.Push()
@@ -165,13 +165,15 @@ func (m *Map) GridToPixel(x, y int) (int, int) {
 
 /*
 SendNotification
-// TODO Simple, in-build image notification system
+// NOTE Simple, in-build image notification system
+  - <!-- order:20 -->
 */
 func (m *Map) SendNotification(message string) {
 	m.Message = message
 
-	// TODO what can we do with notification system, does with need to make a more complexe one for now
+	// NOTE what can we do with notification system, does with need to make a more complexe one for now
 	// or keep using basic fixed size image ?
+	// <!-- order:10 -->
 }
 
 /*
@@ -207,8 +209,6 @@ func (m *Map) RenderScene() string {
 	maxX := baseX / m.GridSize
 	maxY := baseY / m.GridSize
 
-	log.Println(maxX, maxY)
-
 	m.renderSprites(dc)
 
 	m.renderMessage(dc)
@@ -224,7 +224,6 @@ func (m *Map) RenderScene() string {
 	}
 
 	_uuid, _ := uuid.NewUUID()
-	log.Println(currentDir)
 	_filename := fmt.Sprintf(currentDir+"\\tmp_%s.png", _uuid.String())
 
 	err = largerDC.SavePNG(_filename)
@@ -280,7 +279,6 @@ func (m *Map) renderSprites(dc *gg.Context) {
 				_lvl := sprite.Levels[sprite.Level]
 				_lvl.X = sprite.X
 				_lvl.Y = sprite.Y
-				log.Println(_lvl, "level")
 				m.DrawImage(_lvl, dc)
 			} else {
 				m.DrawImage(sprite, dc)
@@ -297,7 +295,12 @@ Simple DiscordInternal function to render in-build notification message
 */
 func (m *Map) renderMessage(dc *gg.Context) {
 	if m.Message != "" {
-		base3, _ := LoadImage("\\assets\\gui.png")
+		base3, _, err := LoadImage("\\assets\\gui.png")
+
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 
 		gui := Sprite{
 			Image:      base3,
@@ -311,10 +314,10 @@ func (m *Map) renderMessage(dc *gg.Context) {
 
 		xpos, ypos := m.GridToPixel(2, gui.Y+2)
 
-		// # TODO maybe add a new font for gui purpose
+		// # NOTE maybe add a new font for gui purpose
 		// ${line}
 		// ${fullPath}
-		// <!-- epic:"lovely" -->
+		// <!-- epic:"lovely" order:0 -->
 
 		//// Open the PNG image file
 		//currentDir, err := os.Getwd()

@@ -1,8 +1,8 @@
 package generator_2d
 
 import (
+	"fmt"
 	"image"
-	"log"
 	"os"
 	"strconv"
 )
@@ -17,13 +17,16 @@ Create a basic FarmLand and returning a working Map.
 
 TODO: Do we need to put this on bot part ? or keep it on 2D lib ?
 */
-func CreateDemoFarmLand() Map {
-	base, imagec := LoadImage("\\assets\\base.png")
+func CreateDemoFarmLand() (Map, error) {
+	base, imagec, err := LoadImage("\\assets\\base.png")
+
+	if err != nil {
+		fmt.Println(err)
+		return Map{}, err
+	}
 
 	baseX := imagec.Bounds().Dx()
 	baseY := imagec.Bounds().Dy()
-
-	log.Println("base", baseX, baseY)
 
 	maxX := baseX / 16
 	maxY := baseY / 16
@@ -44,5 +47,5 @@ func CreateDemoFarmLand() Map {
 		TileMap: baseLand,
 		Sprites: map[string]Sprite{},
 		Debug:   isDebug,
-	}
+	}, nil
 }

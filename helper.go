@@ -2,6 +2,7 @@ package generator_2d
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"image"
 	"image/png"
@@ -24,18 +25,28 @@ Response:
   - Return two thing , an array of bytes representation of the got image, and also an image.Image linked to the image path provider.
 
 // TODO LoadImage error handling
-This function need error handling
+  - This function need error handling
+  - ${line}
+  - ${fullPath}
+  - <!-- order:-80 -->
 */
-func LoadImage(path string) ([]byte, image.Image) {
+
+const (
+	LoadImageGenericError = "GENERIC_LOAD_IMAGE_ERROR"
+)
+
+func LoadImage(path string) ([]byte, image.Image, error) {
 	// Open the PNG image file
 	currentDir, err := os.Getwd()
 	if err != nil {
 		fmt.Println("Failed to get current directory:", err)
+		return nil, nil, errors.New(LoadImageGenericError)
 	}
 
 	file, err := os.Open(currentDir + path)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
+		return nil, nil, errors.New(LoadImageGenericError)
 	}
 
 	defer func(file *os.File) {
@@ -48,7 +59,8 @@ func LoadImage(path string) ([]byte, image.Image) {
 	// Decode the PNG image
 	baseImg, err := png.Decode(file)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
+		return nil, nil, errors.New(LoadImageGenericError)
 	}
 
 	buf := new(bytes.Buffer)
@@ -57,10 +69,11 @@ func LoadImage(path string) ([]byte, image.Image) {
 	err = png.Encode(buf, baseImg)
 	if err != nil {
 		fmt.Println("Failed to encode image:", err)
+		return nil, nil, errors.New(LoadImageGenericError)
 	}
 
 	// Get the encoded image data as a byte slice
 	encodedImage := buf.Bytes()
 
-	return encodedImage, baseImg
+	return encodedImage, baseImg, nil
 }
